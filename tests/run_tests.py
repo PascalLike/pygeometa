@@ -63,6 +63,7 @@ from pygeometa.schemas import (get_supported_schemas, InvalidSchemaError,
                                load_schema)
 from pygeometa.schemas.iso19139 import ISO19139OutputSchema
 from pygeometa.schemas.ogcapi_records import OGCAPIRecordOutputSchema
+from pygeometa.schemas.qgis_qmd import QMDSchema
 
 from sample_schema import SampleOutputSchema
 
@@ -219,12 +220,13 @@ class PygeometaTest(unittest.TestCase):
 
         schemas = sorted(get_supported_schemas())
         self.assertIsInstance(schemas, list, 'Expected list')
-        self.assertEqual(len(schemas), 9,
+        self.assertEqual(len(schemas), 10,
                          'Expected specific number of supported schemas')
         self.assertEqual(sorted(schemas),
                          sorted(['dcat', 'iso19139', 'iso19139-2',
-                                 'iso19139-hnap', 'oarec-record', 'stac-item',
-                                 'wmo-cmp', 'wmo-wcmp2', 'wmo-wigos']),
+                                 'iso19139-hnap', 'oarec-record',
+                                 'qmd', 'stac-item', 'wmo-cmp',
+                                 'wmo-wcmp2', 'wmo-wigos']),
                          'Expected exact list of supported schemas')
 
     def test_render_j2_template(self):
@@ -391,7 +393,7 @@ class PygeometaTest(unittest.TestCase):
         with self.assertRaises(MCFValidationError):
             is_valid = validate_mcf({'foo': 'bar'})
 
-    def test_import(self):
+    def test_import_iso19139(self):
         """test metadata import"""
 
         schema = ISO19139OutputSchema()
@@ -427,6 +429,16 @@ class PygeometaTest(unittest.TestCase):
             expected_bbox = [6.3467, 47.7244, 14.1203, 55.0111]
             self.assertEqual(expected_bbox, result_bbox,
                              'Expected specific BBOX')
+
+    def test_import_qmd(self):
+        """test metadata import"""
+
+        schema = QMDSchema()
+
+        with open(get_abspath('qgis-base-metadata.xml')) as fh:
+            mcf = schema.import_(fh.read())
+
+            print(mcf)
 
 
 def get_abspath(filepath):
